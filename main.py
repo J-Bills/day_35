@@ -3,14 +3,19 @@ import os
 from twilio.rest import Client
 
 
-with open('./openweather_acc.txt') as info_file:
+with open('./openweather_acc.txt', 'r') as info_file:
     contents = info_file.readlines()
     contents = [line.strip() for line in contents]
     
-with open('./twilio_acc.txt') as twilio_info:
+with open('./twilio_acc.txt', 'r') as twilio_info:
     secrets = twilio_info.readlines()
     secrets = [line.strip() for line in secrets]
-
+    
+twilio = {
+    'account_sid': secrets[0],
+    'auth_token': secrets[1],
+    'num': secrets[2]
+}
 
 q: str
 appid: str
@@ -36,6 +41,9 @@ lat_parameters = {
     'cnt': 4
 }
 
+client = Client(twilio.get('account_sid'), twilio.get('auth_token'))
+
+
 
 
 # response = requests.get(f"https://api.openweathermap.org/data/2.5/weather", params=paramemters)
@@ -51,8 +59,18 @@ for num in range(0,3):
     weather_id = data['list'][num]['weather'][0]['id']
     weather_id_list.append(weather_id)
     
-if any(weather_id < 700 for weather_id in weather_id_list):
-    print('bring an umbrella')
-else:
-    print("lovely day")
+print(weather_id_list)
+
+print(twilio)
+    
+if any(weather_id > 700 for weather_id in weather_id_list):
+    message = client.messages \
+                .create(
+                    body="Lovely Day Today",
+                    from_=twilio.get('num'),
+                    to='+11111111'
+                )
+
+print(message.sid)
+
 
